@@ -29,9 +29,9 @@ This guide will help you set up and run the project from a fresh clone of the re
         ```
 - Get a .env file with the right environment variables, with S3 access key and shibboleth keys; there is an example .env file in `.env.example`, or you can ask a team member for a copy of a working .env file.
 
-### Build or pull the images
+### Build or pull the image
 
-To build the images locally, run:
+To build the image locally, run:
 
 ```bash
 npm run build
