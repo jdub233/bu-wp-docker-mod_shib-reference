@@ -1,0 +1,7 @@
+# From: https://www.aleksandrhovhannisyan.com/blog/crlf-vs-lf-normalizing-line-endings-in-git/
+
+# All text files checked in MUST automatically have eof be LF
+* text=auto
+
+# Overrided autocrlf=true for windows. Keeps LF from being replaced by CRLF in working tree.
+* eol=lf
