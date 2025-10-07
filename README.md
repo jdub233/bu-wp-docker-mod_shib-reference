@@ -103,7 +103,7 @@ or click the stop button in the NPM Scripts tab in VSCode.
 #### Destroy the database and start fresh
 
 ```bash
-docker volume rm bu-wp-docker_db_data
+docker volume rm bu-wp-docker-mod_shib-reference_db_data
 ```
 
 ### Note for Windows users
