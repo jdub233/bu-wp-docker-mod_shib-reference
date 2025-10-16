@@ -34,7 +34,7 @@ services:
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD:-password}
       WORDPRESS_DB_NAME: wordpress
-      WORDPRESS_DEBUG: ${WORDPRESS_DEBUG:-true}
+      WORDPRESS_DEBUG: ${WORDPRESS_DEBUG:-0}
       SERVER_NAME: ${WP_HOSTNAME:-wordpress.local}
       HTTP_HOST: ${WP_HOSTNAME:-wordpress.local}
       SP_ENTITY_ID: ${SP_ENTITY_ID:-https://*.kualitest.research.bu.edu/shibboleth}
