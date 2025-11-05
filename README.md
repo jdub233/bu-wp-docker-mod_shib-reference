@@ -110,4 +110,18 @@ docker volume rm bu-wp-docker-mod_shib-reference_db_data
 
 On Windows, changing EXPORT to SET seems to work for setting environment variables in the command prompt.
 
+## Volume mapping for local development
+
+In the docker-compose.yml file, you can map local directories to the container volumes for local development. For example, to map a local site-manager plugin directory to the mu-plugins directory in the container, you can modify the volumes section like so:
+
+```yaml
+    volumes:
+      - wp_build:/var/www/html
+      - /path/to/your/local/bu-slideshow:/var/www/html/wp-content/plugins/bu-slideshow
+```
+
+This change goes under the wordpress service definition in the docker-compose.yml file. Make sure to replace `/path/to/your/local/bu-slideshow` with the actual path to your local bu-slideshow plugin directory.
+
+This mapping tells the container to ignore whatever it has at the mapped location and use your local files instead. This is useful for development, as you can edit the files in your copy of the repository and see the changes reflected in the container immediately. You can leverage things like your existing git setup, and any IDE features you have set up locally.
+
 
