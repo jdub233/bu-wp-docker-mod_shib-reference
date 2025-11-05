@@ -63,6 +63,8 @@ services:
         define( 'S3_UPLOADS_AUTOENABLE', true );
         define( 'S3_UPLOADS_DISABLE_REPLACE_UPLOAD_URL', true);
         define( 'BU_INCLUDES_PATH', '/var/www/html/bu-includes' );
+    volumes:
+      - wp_build:/var/www/html
     networks:
       - wp-network
 
@@ -100,3 +102,4 @@ networks:
 
 volumes:
   db_data:
+  wp_build:
