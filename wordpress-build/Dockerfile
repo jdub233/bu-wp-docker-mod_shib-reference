@@ -72,12 +72,12 @@ COPY wordpress-baseline/healthcheck.htm /usr/src/wordpress/
 RUN rm /etc/apache2/sites-enabled/000-default.conf
 
 # Add error pages, htaccess and PHP upload limits
-COPY wordpress-baseline/_s3proxy-custom-errors /var/www/html/_s3proxy-custom-errors
-COPY wordpress-baseline/.htaccess /var/www/html/
-COPY wordpress-baseline/uploads.ini /usr/local/etc/php/conf.d/
+COPY --chmod=766 wordpress-baseline/_s3proxy-custom-errors /var/www/html/_s3proxy-custom-errors
+COPY --chmod=766 wordpress-baseline/.htaccess /var/www/html/
+COPY --chmod=766 wordpress-baseline/uploads.ini /usr/local/etc/php/conf.d/
 
 # Add S3 proxy configuration
-COPY wordpress-baseline/s3proxy.conf /etc/apache2/sites-available/
+COPY --chmod=766 wordpress-baseline/s3proxy.conf /etc/apache2/sites-available/
 
 # Configure entrypoint script base
 RUN sed -i "/exec "$@"/i\source docker-entrypoint-baseline.sh" /usr/local/bin/docker-entrypoint.sh
