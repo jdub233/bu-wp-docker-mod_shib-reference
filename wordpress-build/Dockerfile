@@ -57,6 +57,10 @@ RUN apt-get -y install libapache2-mod-shib && \
     apache2ctl -M | grep mod_shib && \
     a2enmod auth_basic headers rewrite ssl proxy proxy_http env shib
 
+# Link Apache SSL logs to Docker stdout/stderr
+RUN ln -sf /dev/stdout /var/log/apache2/ssl-access.log && \
+    ln -sf /dev/stderr /var/log/apache2/ssl-error.log
+
 # Copy static configuration files from baseline
 COPY --chmod=766 wordpress-baseline/shibboleth2-template.xml /etc/shibboleth/
 COPY --chmod=766 wordpress-baseline/attribute-map.xml /etc/shibboleth/
