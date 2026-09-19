@@ -12,6 +12,16 @@ ARG WORDPRESS_BASE_IMAGE=wordpress:5.8.3-php7.4-apache
 # Required for Debian 10 (Buster) which is EOL and needs archive.debian.org
 ARG NEEDS_EOL_WORKAROUND=false
 
+######## FOR OLDER DEBIAN VERSIONS OUT OF LONG TERM SUPPORT ########
+# Option to pin apt to a snapshot.debian.org timestamp, e.g. 20260824T000000Z. Covers the window
+# after a suite's Release file expires and its pool starts being drained, but before
+# the suite is published to archive.debian.org - bullseye's state as of 2026-09, which
+# NEEDS_EOL_WORKAROUND cannot fix because archive.debian.org has no bullseye-security
+# suite yet. With a modern base, this workaround is usually unnecessary; empty means use the 
+# base image's own mirrors.
+ARG DEBIAN_SNAPSHOT=""
+
+
 # -----------------------------------------------------------
 #       STAGE 1: System Base (Rarely Changes)
 # -----------------------------------------------------------
@@ -30,6 +40,23 @@ RUN if [ "$NEEDS_EOL_WORKAROUND" = "true" ]; then \
       echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until; \
     fi
     
+######## FOR OLDER DEBIAN VERSIONS OUT OF LONG TERM SUPPORT ########
+# Redirect apt to a pinned snapshot. Rewrites only the mirror host, preserving suite
+# names, so the expired-Release and drained-pool failures both go away while the
+# package set stays the suite's final security state. Handles both the
+# security.debian.org and deb.debian.org/debian-security spellings; the -security
+# substitution must come first, since the plain /debian pattern is a prefix of it.
+# The grep echoes the rewritten sources into the build log for diagnosis.
+ARG DEBIAN_SNAPSHOT
+RUN if [ -n "$DEBIAN_SNAPSHOT" ]; then \
+      sed -i -E "s|https?://[a-z.]*debian.org/debian-security|http://snapshot.debian.org/archive/debian-security/${DEBIAN_SNAPSHOT}|g; \
+                 s|https?://[a-z.]*debian.org/debian|http://snapshot.debian.org/archive/debian/${DEBIAN_SNAPSHOT}|g" /etc/apt/sources.list && \
+      echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until && \
+      grep '^deb' /etc/apt/sources.list; \
+    fi
+   
+
+
 # Install client utils & tools
 RUN apt-get update && \
     apt-get upgrade -y && \
