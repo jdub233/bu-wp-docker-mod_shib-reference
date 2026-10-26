@@ -21,6 +21,9 @@ ARG NEEDS_EOL_WORKAROUND=false
 # base image's own mirrors.
 ARG DEBIAN_SNAPSHOT=""
 
+# Optional exact WordPress core release. Empty = use the base image's core (the normal
+# case). See the overlay step at the end of stage 1.
+ARG WORDPRESS_CORE_VERSION=""
 
 # -----------------------------------------------------------
 #       STAGE 1: System Base (Rarely Changes)
@@ -93,7 +96,8 @@ RUN cd /tmp && \
     cd phpredis && \
     phpize && \
     ./configure --enable-redis-igbinary && \
-    make && make install
+    make && make install && \
+    docker-php-ext-enable redis
 
 # Install and configure Shibboleth
 RUN apt-get -y install libapache2-mod-shib && \
@@ -126,6 +130,24 @@ COPY --chmod=766 wordpress-baseline/s3proxy.conf /etc/apache2/sites-available/
 RUN sed -i "/exec "$@"/i\source docker-entrypoint-baseline.sh" /usr/local/bin/docker-entrypoint.sh
 
 # -----------------------------------------------------------
+#       Optional WordPress core pin
+# -----------------------------------------------------------
+# Overlays an exact WordPress core release on top of the base image's core, for base
+# images on a branch Docker Hub has stopped rebuilding. Empty = use the base image's
+# core, which is the normal case.
+ARG WORDPRESS_CORE_VERSION
+
+RUN set -eux; \
+    if [ -n "$WORDPRESS_CORE_VERSION" ]; then \
+      wp core download \
+        --version="$WORDPRESS_CORE_VERSION" \
+        --path=/usr/src/wordpress \
+        --force \
+        --allow-root; \
+      grep -q "\$wp_version = '$WORDPRESS_CORE_VERSION';" /usr/src/wordpress/wp-includes/version.php; \
+    fi
+
+# -----------------------------------------------------------
 #       STAGE 2: WordPress Code (Changes Frequently)
 # -----------------------------------------------------------
 FROM debian:13-slim AS wp-code-builder
@@ -154,6 +176,12 @@ RUN set -o pipefail && bash /usr/local/bin/wp-build.sh 2>&1 | tee /tmp/repos/bui
 #       STAGE 3: Final Assembly (Quick)
 # -----------------------------------------------------------
 FROM wordpress-system AS final
+
+# Re-declare so the label can read it (ARGs do not cross stage boundaries).
+# The label lets `docker inspect` and ECR report the core version without running the
+# container. Empty when core came from the base image unchanged.
+ARG WORDPRESS_CORE_VERSION
+LABEL bu.wordpress.core="${WORDPRESS_CORE_VERSION}"
 
 # Copy WordPress code from code builder stage
 COPY --from=wp-code-builder /tmp/repos/ /usr/src/wordpress/

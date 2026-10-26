@@ -108,6 +108,8 @@ setup_redis() {
     wp config set WP_REDIS_HOST $REDIS_HOST --add --type=constant
     wp config set WP_REDIS_PORT $REDIS_PORT --add --type=constant
 
+   wp config set WP_REDIS_IGBINARY true --raw --add --type=constant
+
     # If there is a REDIS_PASSWORD available in the environment, add it as a wp config value.
     if [ -n "${REDIS_PASSWORD:-}" ] ; then
       wp config set WP_REDIS_PASSWORD $REDIS_PASSWORD --add --type=constant
